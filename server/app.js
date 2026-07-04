@@ -7,22 +7,26 @@ import authRoutes from './routes/auth.routes.js';
 
 // Create Express app and apply middleware
 
-const app =express()
+const app = express()
 const allowedOrigins = [
   'https://genai-vert.vercel.app',
-  'http://localhost:5173', // your local Vite dev server, adjust port if different
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like Postman/curl)
     if (!origin) return callback(null, true);
+
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+
+    return callback(null, true);
   },
-  credentials: true, // only needed if you're sending cookies/auth headers cross-origin
+  credentials: true,
 }));
 
 
@@ -35,7 +39,7 @@ app.use('/api/chats', chatsRouter);
 
 // Health check route
 app.get('/api/health', (req, res) => {
-    res.json({ success: true, message: 'Server healthy' });
+  res.json({ success: true, message: 'Server healthy' });
 });
 
 export default app;

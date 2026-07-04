@@ -11,11 +11,18 @@ const Login = () => {
                 credential: credentialResponse.credential,
             });
 
-            const { token, user } = response.data.data;
+            const token = response?.data?.data?.token;
+            const user = response?.data?.data?.user;
+
+            if (!token) {
+                throw new Error('No token returned from server');
+            }
+
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            navigate('/');
+            navigate('/', { replace: true });
+            window.location.replace('/');
         } catch (error) {
             console.error('Google login failed:', error);
         }
