@@ -5,13 +5,14 @@ import chatsRouter from './routes/chats.routes.js';
 import authRoutes from './routes/auth.routes.js';
 // ...
 
+// Create Express app and apply middleware
 
+const app =express()
 const allowedOrigins = [
   'https://genai-vert.vercel.app',
   'http://localhost:5173', // your local Vite dev server, adjust port if different
 ];
 
-// Create Express app and apply middleware
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin (like Postman/curl)
