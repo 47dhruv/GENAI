@@ -5,9 +5,24 @@ import chatsRouter from './routes/chats.routes.js';
 import authRoutes from './routes/auth.routes.js';
 // ...
 
+
+const allowedOrigins = process.env.PORT
+   // your local Vite dev server, adjust port if differe
+
 // Create Express app and apply middleware
-const app = express();
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like Postman/curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true, // only needed if you're sending cookies/auth headers cross-origin
+}));
+
+
 app.use(express.json());
 
 // API routes
