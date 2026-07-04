@@ -6,8 +6,10 @@ import authRoutes from './routes/auth.routes.js';
 // ...
 
 
-const allowedOrigins = process.env.PORT
-   // your local Vite dev server, adjust port if differe
+const allowedOrigins = [
+  'https://genai-vert.vercel.app',
+  'http://localhost:5173', // your local Vite dev server, adjust port if different
+];
 
 // Create Express app and apply middleware
 app.use(cors({
