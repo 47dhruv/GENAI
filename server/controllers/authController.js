@@ -21,8 +21,19 @@ export const googleLogin = async (req, res) => {
         const { sub: googleId, email, name, picture } = payload;
 
         let user = await User.findOne({ googleId });
+
         if (!user) {
-            user = await User.create({ googleId, email, name, avatar: picture });
+            user = await User.create({
+                googleId,
+                email,
+                name,
+                avatar: picture,
+            });
+        } else {
+            user.email = email;
+            user.name = name;
+            user.avatar = picture;
+            await user.save();
         }
 
         const token = jwt.sign(

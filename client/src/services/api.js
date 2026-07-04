@@ -15,14 +15,14 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// If a request comes back 401, the token is invalid/expired — force logout
+// If a request comes back 401, the token is invalid or expired.
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error?.response?.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            window.location.href = '/';
         }
         return Promise.reject(error);
     }

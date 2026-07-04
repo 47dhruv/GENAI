@@ -38,7 +38,11 @@ const Navbar = ({ activePersona, isSidebarOpen, onToggleSidebar }) => (
 
             <div className="flex items-center gap-3">
                 <ThemeToggle />
-                <Avatar label="U" />
+                <Avatar
+                    src={activePersona?.avatar}
+                    alt={activePersona?.name}
+                    label={activePersona?.name?.[0] || 'U'}
+                />
             </div>
         </div>
     </header>

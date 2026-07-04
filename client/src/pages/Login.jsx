@@ -1,9 +1,11 @@
 import { GoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
+import { personas } from '../data/personas';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { personaId } = useParams();
 
     const handleSuccess = async (credentialResponse) => {
         try {
@@ -21,8 +23,11 @@ const Login = () => {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            navigate('/', { replace: true });
-            window.location.replace('/');
+            const selectedPersona = personas.find((persona) => persona.id === personaId);
+            const targetPath = selectedPersona ? `/chat/${selectedPersona.id}` : '/chat';
+
+            navigate(targetPath, { replace: true });
+            window.location.replace(targetPath);
         } catch (error) {
             console.error('Google login failed:', error);
         }

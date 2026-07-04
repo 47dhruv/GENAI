@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import api from '../services/api';
 import { ChatInput, ChatWindow } from '../components/chat';
@@ -26,12 +27,26 @@ const mapStoredMessages = (storedMessages = []) =>
  * ============================================================================
  */
 const Home = () => {
-    const [activePersona, setActivePersona] = useState(personas[0]);
+    const { personaId } = useParams();
+    const [activePersona, setActivePersona] = useState(() => {
+        const foundPersona = personas.find((persona) => persona.id === personaId);
+        return foundPersona || personas[0];
+    });
     const [activeChatId, setActiveChatId] = useState(null);
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([initialAssistantMessage]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    useEffect(() => {
+        const foundPersona = personas.find((persona) => persona.id === personaId);
+        if (foundPersona) {
+            setActivePersona(foundPersona);
+            setActiveChatId(null);
+            setMessages([{ sender: 'assistant', text: `Persona changed to ${foundPersona.name}.` }]);
+            setMessage('');
+        }
+    }, [personaId]);
 
     const handleSelectPersona = (persona) => {
         setActivePersona(persona);
@@ -115,15 +130,15 @@ const Home = () => {
             <div className="flex h-screen w-full relative">
                 {/* Mobile Backdrop */}
                 {isSidebarOpen && (
-                    <div 
+                    <div
                         className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden transition-opacity duration-200"
                         onClick={() => setIsSidebarOpen(false)}
                         aria-hidden="true"
                     />
                 )}
-                
+
                 {/* Sidebar Container */}
-                <div 
+                <div
                     className={`fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out lg:relative lg:block
                         ${isSidebarOpen ? 'translate-x-0 lg:w-[320px] lg:opacity-100' : '-translate-x-full lg:w-0 lg:opacity-0 overflow-hidden'}`}
                 >
@@ -141,8 +156,8 @@ const Home = () => {
 
                 {/* Main Content Area */}
                 <section className="flex flex-1 flex-col min-w-0 bg-[var(--background)] transition-all duration-300">
-                    <Navbar 
-                        activePersona={activePersona} 
+                    <Navbar
+                        activePersona={activePersona}
                         isSidebarOpen={isSidebarOpen}
                         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
                     />
