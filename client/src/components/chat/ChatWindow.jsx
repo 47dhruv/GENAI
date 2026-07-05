@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Badge, Card } from '../ui';
 import Message from './Message';
 
 /**
@@ -13,7 +12,7 @@ import Message from './Message';
  * Features:
  * - Scrollable chat area
  * - Automatic scroll to latest message
- * - Welcome banner
+ * - Welcome/empty state
  * - Clean and responsive layout
  *
  * Props:
@@ -30,49 +29,60 @@ import Message from './Message';
  * ============================================================================
  */
 
-const ChatWindow = ({ messages }) => {
+const loadingMessages = ['Assistant thinking', 'Analysing', 'Working'];
+
+const ChatWindow = ({ messages, isLoading = false }) => {
     const bottomRef = useRef(null);
+    const [loadingIndex, setLoadingIndex] = useState(0);
+    const hasMessages = messages.length > 0;
+
+    useEffect(() => {
+        if (!isLoading) {
+            setLoadingIndex(0);
+            return undefined;
+        }
+
+        const intervalId = window.setInterval(() => {
+            setLoadingIndex((currentIndex) => (currentIndex + 1) % loadingMessages.length);
+        }, 900);
+
+        return () => window.clearInterval(intervalId);
+    }, [isLoading]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({
             behavior: 'smooth',
         });
-    }, [messages]);
+    }, [messages, isLoading]);
+
+    if (!hasMessages && !isLoading) {
+        return (
+            <section className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-10">
+                <div className="max-w-md text-center">
+                    <span className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--accent-soft)] text-sm font-semibold tracking-tight text-[var(--accent-text)]">
+                        AI
+                    </span>
+                    <h2 className="text-xl font-semibold tracking-[-0.01em] text-[var(--text)]">
+                        Start a conversation
+                    </h2>
+                    <p className="mx-auto mt-2.5 max-w-sm text-[0.9rem] leading-6 text-[var(--muted)]">
+                        Pick a persona from the sidebar and ask a question — responses appear here as they arrive.
+                    </p>
+                </div>
+            </section>
+        );
+    }
 
     return (
-        <section className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-            <div className="space-y-6">
-                <Card className="overflow-hidden p-6">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="space-y-4">
-                            <Badge label="Welcome" />
-                            <h2 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
-                                A premium space for smart AI conversations.
-                            </h2>
-                            <p className="max-w-2xl text-sm leading-7 text-[var(--muted)]">
-                                Keep the context clear, the layout calm, and the chat experience focused.
-                            </p>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] px-4 py-4 shadow-sm">
-                                <p className="text-sm font-semibold text-[var(--text)]">Refined workflow</p>
-                                <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Organized message flow with premium spacing.</p>
-                            </div>
-                            <div className="rounded-[1.5rem] border border-[var(--border)] bg-[var(--surface)] px-4 py-4 shadow-sm">
-                                <p className="text-sm font-semibold text-[var(--text)]">Ready for scale</p>
-                                <p className="mt-2 text-xs leading-5 text-[var(--muted)]">Designed for future AI features and workflows.</p>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-
-                <div className="space-y-5">
-                    {messages.map((message, index) => (
-                        <Message key={`${message.sender}-${index}`} sender={message.sender} text={message.text} />
-                    ))}
-                    <div ref={bottomRef} />
-                </div>
+        <section className="flex-1 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto flex w-full max-w-3xl flex-col gap-1">
+                {messages.map((message, index) => (
+                    <Message key={`${message.sender}-${index}`} sender={message.sender} text={message.text} />
+                ))}
+                {isLoading && (
+                    <Message sender="assistant" text={`${loadingMessages[loadingIndex]}…`} />
+                )}
+                <div ref={bottomRef} />
             </div>
         </section>
     );

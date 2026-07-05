@@ -37,6 +37,30 @@ const Home = () => {
     const [messages, setMessages] = useState([initialAssistantMessage]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [quota, setQuota] = useState(null);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await api.get('/auth/me');
+                const currentQuota = response?.data?.data?.quota;
+
+                if (isMounted && currentQuota) {
+                    setQuota(currentQuota);
+                }
+            } catch (error) {
+                console.error('Failed to load user quota:', error);
+            }
+        };
+
+        fetchCurrentUser();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     useEffect(() => {
         const foundPersona = personas.find((persona) => persona.id === personaId);
@@ -83,7 +107,19 @@ const Home = () => {
 
     const handleSend = async () => {
         const trimmedMessage = message.trim();
-        if (!trimmedMessage) return;
+        if (!trimmedMessage || isLoading) return;
+
+        if (quota?.remaining === 0) {
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    sender: 'assistant',
+                    text: 'You have used all 40 questions for today. Please come back after the daily reset.',
+                },
+            ]);
+            setMessage('');
+            return;
+        }
 
         setMessages((prevMessages) => [
             ...prevMessages,
@@ -107,12 +143,35 @@ const Home = () => {
             });
 
             const assistantText = response?.data?.data?.assistant || 'Sorry, I could not generate a response.';
+            const currentQuota = response?.data?.data?.quota;
+
+            if (currentQuota) {
+                setQuota(currentQuota);
+            }
+
             setMessages((prevMessages) => [
                 ...prevMessages,
                 { sender: 'assistant', text: assistantText },
             ]);
         } catch (error) {
             console.error('Chat API error:', error);
+            const currentQuota = error?.response?.data?.data?.quota;
+
+            if (currentQuota) {
+                setQuota(currentQuota);
+            }
+
+            if (error?.response?.status === 429) {
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    {
+                        sender: 'assistant',
+                        text: 'You have used all 40 questions for today. Please come back after the daily reset.',
+                    },
+                ]);
+                return;
+            }
+
             setMessages((prevMessages) => [
                 ...prevMessages,
                 {
@@ -160,14 +219,17 @@ const Home = () => {
                         activePersona={activePersona}
                         isSidebarOpen={isSidebarOpen}
                         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                        quota={quota}
                     />
 
                     <div className="flex flex-1 flex-col overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
-                        <ChatWindow messages={messages} />
+                        <ChatWindow messages={messages} isLoading={isLoading} />
                         <ChatInput
                             message={message}
                             onChange={setMessage}
                             onSend={handleSend}
+                            isLoading={isLoading}
+                            isDisabled={quota?.remaining === 0}
                         />
                     </div>
                 </section>

@@ -1,5 +1,5 @@
 import { GoogleLogin } from '@react-oauth/google';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../services/api';
 import { personas } from '../data/personas';
 
@@ -51,6 +51,12 @@ const Login = () => {
                         onSuccess={handleSuccess}
                         onError={() => console.error('Google login failed')}
                     />
+                </div>
+
+                <div className="mt-6 flex justify-center">
+                    <Link to="/" className="text-sm font-medium text-[var(--muted)] hover:text-white transition-colors">
+                        &larr; Back to Home
+                    </Link>
                 </div>
             </div>
         </main>

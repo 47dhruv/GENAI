@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
@@ -28,6 +28,7 @@ const App = () => (
                         </RequireAuth>
                     }
                 />
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </div>
     </GoogleOAuthProvider>

@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema(
         email: { type: String, required: true },
         name: { type: String },
         avatar: { type: String },
+        dailyQuestionCount: { type: Number, default: 0 },
+        dailyQuestionDate: { type: String },
     },
     { timestamps: true }
 );

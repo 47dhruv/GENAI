@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { personas } from '../data/personas';
+import api from '../services/api';
 
 const personaDetails = {
     hitesh: {
@@ -43,6 +45,32 @@ const getChatPath = (personaId) => (
 
 const Landing = () => {
     const isLoggedIn = Boolean(localStorage.getItem('token'));
+    const [quota, setQuota] = useState(null);
+
+    useEffect(() => {
+        if (!isLoggedIn) return undefined;
+
+        let isMounted = true;
+
+        const fetchQuota = async () => {
+            try {
+                const response = await api.get('/auth/me');
+                const currentQuota = response?.data?.data?.quota;
+
+                if (isMounted && currentQuota) {
+                    setQuota(currentQuota);
+                }
+            } catch (error) {
+                console.error('Failed to load landing quota:', error);
+            }
+        };
+
+        fetchQuota();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [isLoggedIn]);
 
     return (
     <main className="h-screen overflow-y-auto bg-[#0E0D0B] px-4 py-8 text-[#F3EDE3] sm:px-6 lg:px-10">
@@ -55,6 +83,21 @@ const Landing = () => {
         `}</style>
 
         <div className="mx-auto flex min-h-full max-w-6xl flex-col gap-6">
+            <nav className="flex shrink-0 items-center justify-between rounded-2xl border border-white/[0.06] bg-[#141210] px-5 py-4">
+                <Link to="/" className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-[#F3EDE3]">
+                    AI Persona Chat
+                </Link>
+
+                {isLoggedIn && (
+                    <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs">
+                        <span className="hidden text-white/45 sm:inline">Questions left</span>
+                        <span className="font-semibold text-[#F3EDE3]">
+                            {typeof quota?.remaining === 'number' ? `${quota.remaining}/${quota.limit ?? 40}` : '--/40'}
+                        </span>
+                    </div>
+                )}
+            </nav>
+
             <section className="grid shrink-0 gap-8 rounded-[28px] border border-white/[0.06] bg-[#141210] p-7 lg:grid-cols-[1.3fr_1fr] lg:p-9">
                 <div className="flex flex-col justify-center gap-5">
                     <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.25em] text-[#A79C8C]">
@@ -69,13 +112,22 @@ const Landing = () => {
                     <p className="max-w-md text-base leading-7 text-white/60">
                         Chat with AI personas trained on Hitesh&apos;s and Piyush&apos;s teaching style. Ask your doubt the way you would ask it live, whenever you are stuck.
                     </p>
-                    {!isLoggedIn && (
+                    {!isLoggedIn ? (
                         <div className="flex flex-wrap gap-3 pt-1">
                             <Link
                                 to="/login"
                                 className="inline-flex items-center justify-center rounded-xl bg-[#F3EDE3] px-5 py-2.5 text-sm font-semibold text-[#0E0D0B] transition hover:bg-white"
                             >
                                 Login
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="flex flex-wrap gap-3 pt-1">
+                            <Link
+                                to="/chat"
+                                className="inline-flex items-center justify-center rounded-xl bg-[#F3EDE3] px-5 py-2.5 text-sm font-semibold text-[#0E0D0B] transition hover:bg-white"
+                            >
+                                Go to Chat
                             </Link>
                         </div>
                     )}
