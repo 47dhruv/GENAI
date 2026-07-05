@@ -1,11 +1,21 @@
 import { GoogleLogin } from '@react-oauth/google';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
 import { personas } from '../data/personas';
+
+const getChatTargetPath = (personaId) => {
+    const selectedPersona = personas.find((persona) => persona.id === personaId);
+    return selectedPersona ? `/chat/${selectedPersona.id}` : '/chat';
+};
 
 const Login = () => {
     const navigate = useNavigate();
     const { personaId } = useParams();
+    const targetPath = getChatTargetPath(personaId);
+
+    if (localStorage.getItem('token')) {
+        return <Navigate to={targetPath} replace />;
+    }
 
     const handleSuccess = async (credentialResponse) => {
         try {
@@ -22,9 +32,6 @@ const Login = () => {
 
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-
-            const selectedPersona = personas.find((persona) => persona.id === personaId);
-            const targetPath = selectedPersona ? `/chat/${selectedPersona.id}` : '/chat';
 
             navigate(targetPath, { replace: true });
             window.location.replace(targetPath);

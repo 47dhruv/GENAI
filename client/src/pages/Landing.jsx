@@ -41,7 +41,10 @@ const getChatPath = (personaId) => (
     localStorage.getItem('token') ? `/chat/${personaId}` : `/login/${personaId}`
 );
 
-const Landing = () => (
+const Landing = () => {
+    const isLoggedIn = Boolean(localStorage.getItem('token'));
+
+    return (
     <main className="h-screen overflow-y-auto bg-[#0E0D0B] px-4 py-8 text-[#F3EDE3] sm:px-6 lg:px-10">
         <style>{`
             @keyframes psn-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
@@ -55,7 +58,7 @@ const Landing = () => (
             <section className="grid shrink-0 gap-8 rounded-[28px] border border-white/[0.06] bg-[#141210] p-7 lg:grid-cols-[1.3fr_1fr] lg:p-9">
                 <div className="flex flex-col justify-center gap-5">
                     <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] uppercase tracking-[0.25em] text-[#A79C8C]">
-                        ~/parsona
+                        ~/persona
                     </span>
                     <h1
                         className="max-w-xl text-4xl leading-[1.1] text-[#F3EDE3] sm:text-5xl"
@@ -66,14 +69,16 @@ const Landing = () => (
                     <p className="max-w-md text-base leading-7 text-white/60">
                         Chat with AI personas trained on Hitesh&apos;s and Piyush&apos;s teaching style. Ask your doubt the way you would ask it live, whenever you are stuck.
                     </p>
-                    <div className="flex flex-wrap gap-3 pt-1">
-                        <Link
-                            to="#personas"
-                            className="inline-flex items-center justify-center rounded-xl bg-[#F3EDE3] px-5 py-2.5 text-sm font-semibold text-[#0E0D0B] transition hover:bg-white"
-                        >
-                            Choose a mentor
-                        </Link>
-                    </div>
+                    {!isLoggedIn && (
+                        <div className="flex flex-wrap gap-3 pt-1">
+                            <Link
+                                to="/login"
+                                className="inline-flex items-center justify-center rounded-xl bg-[#F3EDE3] px-5 py-2.5 text-sm font-semibold text-[#0E0D0B] transition hover:bg-white"
+                            >
+                                Login
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 <div className="hidden overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0908] lg:block">
@@ -162,6 +167,7 @@ const Landing = () => (
             </section>
         </div>
     </main>
-);
+    );
+};
 
 export default Landing;
