@@ -52,7 +52,7 @@ The application handles conversational context to maintain coherent and flowing 
      ```
    - In the `client` directory, create a `.env` file with:
      ```env
-     VITE_API_URL=http://localhost:5000/api
+     VITE_API_URL=https://genai-xuio.onrender.com
      ```
 
 ### Run Development Servers
@@ -62,10 +62,10 @@ Start both servers simultaneously in two separate terminals:
   ```bash
   cd server && npm run dev
   ```
-  *The server will run on http://localhost:5000*
+  *The server will run on https://genai-xuio.onrender.com*
 
 - **Frontend (Client)**:
   ```bash
   cd client && npm run dev
   ```
-  *The client will run on http://localhost:5173*
+  *The client will run on https://genai-vert.vercel.app/*
